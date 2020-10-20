@@ -1,0 +1,4 @@
+[flake8]
+per-file-ignores =
+    lilang/parser.py: F821, F811
+    lilang/lexer.py: F821

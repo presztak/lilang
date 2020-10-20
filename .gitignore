@@ -1,0 +1,9 @@
+*.py[cod]
+__pycache__
+.DS_Store
+
+# Packages
+.eggs
+
+# Libs
+lilang/lib
