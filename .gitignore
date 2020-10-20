@@ -4,3 +4,6 @@ __pycache__
 
 # Packages
 .eggs
+
+# Libs
+*.so
