@@ -27,7 +27,9 @@ class LLVMTestCase(unittest.TestCase):
     def run_file(self, f):
         current_path = os.path.dirname(os.path.realpath(__file__))
         test_file_path = os.path.join(current_path, 'programs', f)
-        self.llvm_cg.compile(test_file_path, output_path=self.output_path)
+        self.llvm_cg.compile_from_file(
+            test_file_path, output_path=self.output_path
+        )
         try:
             subprocess.check_output([
                 self.output_path,
