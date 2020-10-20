@@ -1,15 +1,6 @@
 import setuptools
-from setuptools.command.install import install
 from distutils.command.build_ext import build_ext
 from distutils.core import Extension
-
-import shutil
-import os
-
-
-def cp_libs():
-    os.makedirs('lilang/lib', exist_ok=True)
-    shutil.copy('lib/io.li', 'lilang/lib/io.li')
 
 
 class LilangBuildExt(build_ext):
@@ -17,12 +8,6 @@ class LilangBuildExt(build_ext):
         filename = super().get_ext_filename(ext_name)
         filename_parts = filename.split('.')
         return f'{filename_parts[0]}.{filename_parts[-1]}'
-
-
-class LilangInstall(install):
-    def run(self):
-        install.run(self)
-        cp_libs()
 
 
 iolib = Extension(
@@ -61,7 +46,6 @@ setuptools.setup(
     },
     cmdclass={
         'build_ext': LilangBuildExt,
-        'install': LilangInstall
     },
     ext_modules=[iolib]
 )

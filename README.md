@@ -17,8 +17,8 @@ The purpose of this project is to learn and experiment with compiler design.
     * `cd lilang`
 
 3. Build and install
-    * `python setup.py sdist bdist_wheel`
-    * `pip install sdist/lilang-*.whl`
+    * `python setup.py bdist_wheel`
+    * `pip install dist/lilang-*.whl`
 
 ## Development
 
