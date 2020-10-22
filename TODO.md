@@ -8,7 +8,7 @@ TODO
 * [ ] Add 'continue', 'break' statements
 * [ ] Add bool, char data types
 * [ ] Support for declaring multiple variables in one line
-* [ ] Support for extra assignment operators e.g. +=, -=, *=, /=
+* [x] Support for extra assignment operators e.g. +=, -=, *=, /=
 * [ ] Possibility to print formatted strings
 * [ ] Support for script arguments
 * [ ] Indenpendence from gcc (use lld?)
