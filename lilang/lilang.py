@@ -37,6 +37,7 @@ def main(lexer, parser, code, output_path, filename):
         for tok in lexer.tokenize(code):
             print('type=%r, value=%r' % (tok.type, tok.value))
     elif parser is True:
+        code = get_code(code, filename)
         lexer = LilangLexer()
         parser = LilangParser()
         result = parser.parse(lexer.tokenize(code))
