@@ -4,6 +4,10 @@ __pycache__
 
 # Packages
 .eggs
+lilang.egg-info
 
 # Libs
 *.so
+
+# Bins
+bin
