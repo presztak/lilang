@@ -131,8 +131,18 @@ class LLVMCodeGenerator(CodeGenerator):
 
     def _generate_AstIfStat(self, node):
         condition = self.generate_code(node.condition)
-        with self.builder.if_then(condition):
-            return self.generate_code(node.stat_lst)
+
+        # 'If' without else clause
+        if not node.else_stat_lst:
+            with self.builder.if_then(condition):
+                return self.generate_code(node.stat_lst)
+        # 'If'/'Else' case
+        else:
+            with self.builder.if_else(condition) as (then, otherwise):
+                with then:
+                    self.generate_code(node.stat_lst)
+                with otherwise:
+                    self.generate_code(node.else_stat_lst)
 
     def _generate_AstWhileStat(self, node):
         loop_cond = self.builder.function.append_basic_block(name='loop_cond')

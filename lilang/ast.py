@@ -81,9 +81,10 @@ class AstDeclStat(AstNode):
 
 class AstIfStat(AstNode):
 
-    def __init__(self, condition, stat_lst):
+    def __init__(self, condition, stat_lst, else_stat_lst=None):
         self.condition = condition
         self.stat_lst = stat_lst
+        self.else_stat_lst = else_stat_lst
 
 
 class AstWhileStat(AstNode):

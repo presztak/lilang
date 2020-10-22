@@ -4,7 +4,7 @@ from sly import Lexer
 class LilangLexer(Lexer):
 
     tokens = [
-        IF, WHILE, RETURN, TYPE, ID, ASSIGN, NUMBER,
+        IF, ELSE, WHILE, RETURN, TYPE, ID, ASSIGN, NUMBER,
         PLUS, MINUS, TIMES, DIVIDE, LT, LE, GT, GE, EQ,
         AND, OR
     ]
@@ -14,6 +14,7 @@ class LilangLexer(Lexer):
     ignore = ' \t\n'
 
     IF = r'if'
+    ELSE = r'else'
     WHILE = r'while'
     RETURN = r'return'
     TYPE = r'void|int\[\]|int'

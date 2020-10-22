@@ -26,6 +26,8 @@ class LilangParser(Parser):
     precedence = (
         ('left', OR),
         ('left', AND),
+        ('left', THEN),
+        ('left', ELSE),
         ('nonassoc', LT, LE, GT, GE, EQ),
         ('left', PLUS, MINUS),
         ('left', TIMES, DIVIDE),
@@ -71,6 +73,10 @@ class LilangParser(Parser):
     def stat(self, p):
         return AstStatLst(p.expr)
 
+    @_('"{" stat_lst "}"')
+    def stat(self, p):
+        return p.stat_lst
+
     @_('TYPE ID "(" params_lst ")" "{" stat_lst "}"')
     def stat(self, p):
         return AstFnDef(p.TYPE, p.ID, p.stat_lst, p.params_lst)
@@ -99,9 +105,13 @@ class LilangParser(Parser):
     def stat(self, p):
         return AstAssignStat(p.ID, p.expr1, p.expr0)
 
-    @_('IF "(" expr ")" "{" stat_lst "}" ')
+    @_('IF "(" expr ")" stat ELSE stat')
     def stat(self, p):
-        return AstIfStat(p.expr, p.stat_lst)
+        return AstIfStat(p.expr, p.stat0, p.stat1)
+
+    @_('IF "(" expr ")" stat %prec THEN')
+    def stat(self, p):
+        return AstIfStat(p.expr, p.stat)
 
     @_('WHILE "(" expr ")" "{" stat_lst "}" ')
     def stat(self, p):
