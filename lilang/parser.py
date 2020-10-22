@@ -97,13 +97,25 @@ class LilangParser(Parser):
     def stat(self, p):
         return AstDeclStat(p.TYPE, p.ID, p.expr)
 
-    @_('ID ASSIGN expr ";"')
+    @_(
+        'ID ASSIGN expr ";"',
+        'ID PLUS_ASSIGN expr ";"',
+        'ID MINUS_ASSIGN expr ";"',
+        'ID TIMES_ASSIGN expr ";"',
+        'ID DIVIDE_ASSIGN expr ";"'
+    )
     def stat(self, p):
-        return AstAssignStat(p.ID, p.expr)
+        return AstAssignStat(p.ID, p.expr, p[1])
 
-    @_('ID "[" expr "]" ASSIGN expr ";"')
+    @_(
+        'ID "[" expr "]" ASSIGN expr ";"',
+        'ID "[" expr "]" PLUS_ASSIGN expr ";"',
+        'ID "[" expr "]" MINUS_ASSIGN expr ";"',
+        'ID "[" expr "]" TIMES_ASSIGN expr ";"',
+        'ID "[" expr "]" DIVIDE_ASSIGN expr ";"'
+    )
     def stat(self, p):
-        return AstAssignStat(p.ID, p.expr1, p.expr0)
+        return AstAssignStat(p.ID, p.expr1, p[4], p.expr0)
 
     @_('IF "(" expr ")" stat ELSE stat')
     def stat(self, p):

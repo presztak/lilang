@@ -65,9 +65,10 @@ class AstLstExpr(AstNode):
 
 class AstAssignStat(AstNode):
 
-    def __init__(self, identifier, expr, index_expr=None):
+    def __init__(self, identifier, expr, operator, index_expr=None):
         self.identifier = identifier
         self.expr = expr
+        self.operator = operator
         self.index_expr = index_expr
 
 

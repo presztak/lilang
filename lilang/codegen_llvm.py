@@ -106,6 +106,16 @@ class LLVMCodeGenerator(CodeGenerator):
         if node.index_expr:
             idx = self.generate_code(node.index_expr)
             var_addr = self.builder.gep(var_addr, [idx])
+
+        if node.operator == '+=':
+            result = self.builder.add(self.builder.load(var_addr), result)
+        elif node.operator == '-=':
+            result = self.builder.sub(self.builder.load(var_addr), result)
+        elif node.operator == '*=':
+            result = self.builder.mul(self.builder.load(var_addr), result)
+        elif node.operator == '/=':
+            result = self.builder.sdiv(self.builder.load(var_addr), result)
+
         self.builder.store(result, var_addr)
         return result
 
