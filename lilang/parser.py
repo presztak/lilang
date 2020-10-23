@@ -8,6 +8,8 @@ from .ast import (
     AstFnCall,
     AstFnDef,
     AstIfStat,
+    AstInitDecl,
+    AstInitDeclList,
     AstLstExpr,
     AstNumber,
     AstParamsLst,
@@ -93,9 +95,21 @@ class LilangParser(Parser):
     def expr(self, p):
         return AstFnCall(p.ID, p.args_lst)
 
-    @_('TYPE ID ASSIGN expr ";"')
+    @_('ID ASSIGN expr')
+    def init_decl(self, p):
+        return AstInitDecl(p.ID, p.expr)
+
+    @_('init_decl')
+    def init_decl_lst(self, p):
+        return AstInitDeclList(p.init_decl)
+
+    @_('init_decl "," init_decl_lst')
+    def init_decl_lst(self, p):
+        return AstInitDeclList(p.init_decl, p.init_decl_lst)
+
+    @_('TYPE init_decl_lst ";"')
     def stat(self, p):
-        return AstDeclStat(p.TYPE, p.ID, p.expr)
+        return AstDeclStat(p.TYPE, p.init_decl_lst)
 
     @_(
         'ID ASSIGN expr ";"',

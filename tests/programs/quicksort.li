@@ -1,8 +1,5 @@
 void quicksort(int[] arr, int first, int last) {
-   int i = 0;
-   int j = 0;
-   int pivot = 0;
-   int temp = 0;
+   int i = 0, j = 0, pivot = 0, temp = 0;
 
    if(first < last) {
       pivot = first;
@@ -11,10 +8,10 @@ void quicksort(int[] arr, int first, int last) {
 
       while(i < j) {
          while(arr[i] <= arr[pivot] && i < last) {
-             i = i + 1;
+             i += 1;
          }
          while(arr[j] > arr[pivot]) {
-             j = j - 1;
+             j -= 1;
          }
 
          if(i<j) {

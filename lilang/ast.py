@@ -72,12 +72,27 @@ class AstAssignStat(AstNode):
         self.index_expr = index_expr
 
 
-class AstDeclStat(AstNode):
+class AstInitDecl(AstNode):
 
-    def __init__(self, type, identifier, expr):
-        self.type = type
+    def __init__(self, identifier, expr):
         self.identifier = identifier
         self.expr = expr
+
+
+class AstInitDeclList(AstNode):
+
+    def __init__(self, init_decl, init_decl_lst=None):
+        if init_decl_lst:
+            self.init_decl_lst = init_decl_lst.init_decl_lst + [init_decl]
+        else:
+            self.init_decl_lst = [init_decl]
+
+
+class AstDeclStat(AstNode):
+
+    def __init__(self, type, init_decl_lst):
+        self.type = type
+        self.init_decl_lst = init_decl_lst
 
 
 class AstIfStat(AstNode):

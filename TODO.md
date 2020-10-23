@@ -7,7 +7,7 @@ TODO
 * [ ] 'For' loop
 * [ ] Add 'continue', 'break' statements
 * [ ] Add bool, char data types
-* [ ] Support for declaring multiple variables in one line
+* [x] Support for declaring multiple variables in one line
 * [x] Support for extra assignment operators e.g. +=, -=, *=, /=
 * [ ] Possibility to print formatted strings
 * [ ] Support for script arguments
