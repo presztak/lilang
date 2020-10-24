@@ -7,6 +7,7 @@ from .ast import (
     AstDeclStat,
     AstFnCall,
     AstFnDef,
+    AstForStat,
     AstIfStat,
     AstInitDecl,
     AstInitDeclList,
@@ -142,6 +143,10 @@ class LilangParser(Parser):
     @_('WHILE "(" expr ")" "{" stat_lst "}" ')
     def stat(self, p):
         return AstWhileStat(p.expr, p.stat_lst)
+
+    @_('FOR "(" stat  expr ";" stat ")" "{" stat_lst "}" ')
+    def stat(self, p):
+        return AstForStat(p.stat0, p.expr, p.stat1, p.stat_lst)
 
     @_('RETURN expr ";"')
     def stat(self, p):

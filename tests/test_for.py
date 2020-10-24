@@ -1,15 +1,13 @@
 from llvm_test_case import LLVMTestCase
 
 
-class WhileTestCase(LLVMTestCase):
+class ForTestCase(LLVMTestCase):
 
-    def test_while(self):
+    def test_for(self):
         code = '''
-            int x = 10;
             int counter = 0;
-            while (x > 0) {
+            for (int i = 0; i < 10; i += 1;) {
                 counter = counter + 1;
-                x = x - 1;
             }
             printi(counter);
         '''

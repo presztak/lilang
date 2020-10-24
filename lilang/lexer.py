@@ -6,7 +6,8 @@ class LilangLexer(Lexer):
     tokens = [
         IF, ELSE, WHILE, RETURN, TYPE, ID, ASSIGN, NUMBER,
         PLUS, MINUS, TIMES, DIVIDE, LT, LE, GT, GE, EQ,
-        AND, OR, PLUS_ASSIGN, MINUS_ASSIGN, TIMES_ASSIGN, DIVIDE_ASSIGN
+        AND, OR, PLUS_ASSIGN, MINUS_ASSIGN, TIMES_ASSIGN, DIVIDE_ASSIGN,
+        FOR
     ]
 
     literals = {';', '(', ')', '{', '}', '[', ']', ','}
@@ -16,6 +17,7 @@ class LilangLexer(Lexer):
     IF = r'if'
     ELSE = r'else'
     WHILE = r'while'
+    FOR = r'for'
     RETURN = r'return'
     TYPE = r'void|int\[\]|int'
     ID = r'[a-zA-Z][a-zA-Z]*'

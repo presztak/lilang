@@ -103,6 +103,15 @@ class AstIfStat(AstNode):
         self.else_stat_lst = else_stat_lst
 
 
+class AstForStat(AstNode):
+
+    def __init__(self, init_stat, condition, step_stat, stat_lst):
+        self.init_stat = init_stat
+        self.condition = condition
+        self.step_stat = step_stat
+        self.stat_lst = stat_lst
+
+
 class AstWhileStat(AstNode):
 
     def __init__(self, condition, stat_lst):

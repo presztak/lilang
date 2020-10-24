@@ -4,7 +4,7 @@ TODO
 ### Version 0.2.0
 
 * [x] Support for 'else' clause
-* [ ] 'For' loop
+* [x] 'For' loop
 * [ ] Add 'continue', 'break' statements
 * [ ] Add bool, char data types
 * [x] Support for declaring multiple variables in one line

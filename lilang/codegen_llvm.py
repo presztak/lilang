@@ -160,6 +160,26 @@ class LLVMCodeGenerator(CodeGenerator):
                 with otherwise:
                     self.generate_code(node.else_stat_lst)
 
+    def _generate_AstForStat(self, node):
+        self.generate_code(node.init_stat)
+        loop_cond = self.builder.function.append_basic_block(name='loop_cond')
+        self.builder.branch(loop_cond)
+        self.builder.position_at_end(loop_cond)
+        condition = self.generate_code(node.condition)
+
+        loop_body = self.builder.function.append_basic_block(name='loop_body')
+        self.builder.position_at_start(loop_body)
+        self.generate_code(node.stat_lst)
+
+        loop_end = self.builder.function.append_basic_block(name='loop_end')
+        self.generate_code(node.step_stat)
+        self.builder.branch(loop_cond)
+
+        self.builder.position_at_end(loop_cond)
+        self.builder.cbranch(condition, loop_body, loop_end)
+
+        self.builder.position_at_start(loop_end)
+
     def _generate_AstWhileStat(self, node):
         loop_cond = self.builder.function.append_basic_block(name='loop_cond')
         self.builder.branch(loop_cond)
