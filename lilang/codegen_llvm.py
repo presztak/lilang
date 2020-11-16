@@ -17,6 +17,20 @@ class LLVMVariable(object):
         self.address = address
 
 
+class LLVMLoop(object):
+
+    def __init__(self, loop_cond, loop_body, loop_end, loop_step=None):
+        self.loop_cond = loop_cond
+        self.loop_body = loop_body
+        self.loop_end = loop_end
+        self.loop_step = loop_step
+
+    def continue_block(self):
+        if self.loop_step:
+            return self.loop_step
+        return self.loop_cond
+
+
 class LLVMCodeGenerator(CodeGenerator):
 
     def __init__(self):
@@ -27,6 +41,8 @@ class LLVMCodeGenerator(CodeGenerator):
         self.block = None
         self.variables = {}
         self.functions = {}
+        self.loops = []
+        self.break_stat_generation = False
 
         llvm_binding.initialize()
         llvm_binding.initialize_native_target()
@@ -78,7 +94,11 @@ class LLVMCodeGenerator(CodeGenerator):
 
     def _generate_AstStatLst(self, node):
         for stat in node.stat_lst:
+            if self.break_stat_generation is True:
+                break
             self.generate_code(stat)
+
+        self.break_stat_generation = False
 
     def _generate_AstBinExpr(self, node):
         expr0 = self.generate_code(node.expr0)
@@ -161,17 +181,26 @@ class LLVMCodeGenerator(CodeGenerator):
                     self.generate_code(node.else_stat_lst)
 
     def _generate_AstForStat(self, node):
-        self.generate_code(node.init_stat)
         loop_cond = self.builder.function.append_basic_block(name='loop_cond')
+        loop_body = self.builder.function.append_basic_block(name='loop_body')
+        loop_step = self.builder.function.append_basic_block(name='loop_step')
+        loop_end = self.builder.function.append_basic_block(name='loop_end')
+
+        self.loops.append(LLVMLoop(loop_cond, loop_body, loop_end, loop_step))
+
+        self.generate_code(node.init_stat)
+
         self.builder.branch(loop_cond)
-        self.builder.position_at_end(loop_cond)
+        self.builder.position_at_start(loop_cond)
         condition = self.generate_code(node.condition)
 
-        loop_body = self.builder.function.append_basic_block(name='loop_body')
         self.builder.position_at_start(loop_body)
         self.generate_code(node.stat_lst)
 
-        loop_end = self.builder.function.append_basic_block(name='loop_end')
+        if not self.builder.block.is_terminated:
+            self.builder.branch(loop_step)
+
+        self.builder.position_at_start(loop_step)
         self.generate_code(node.step_stat)
         self.builder.branch(loop_cond)
 
@@ -180,18 +209,23 @@ class LLVMCodeGenerator(CodeGenerator):
 
         self.builder.position_at_start(loop_end)
 
+        self.loops.pop()
+
     def _generate_AstWhileStat(self, node):
         loop_cond = self.builder.function.append_basic_block(name='loop_cond')
+        loop_body = self.builder.function.append_basic_block(name='loop_body')
+        loop_end = self.builder.function.append_basic_block(name='loop_end')
+
+        self.loops.append(LLVMLoop(loop_cond, loop_body, loop_end))
+
         self.builder.branch(loop_cond)
         self.builder.position_at_end(loop_cond)
         condition = self.generate_code(node.condition)
 
-        loop_body = self.builder.function.append_basic_block(name='loop_body')
         self.builder.position_at_start(loop_body)
         self.generate_code(node.stat_lst)
-
-        loop_end = self.builder.function.append_basic_block(name='loop_end')
-        self.builder.branch(loop_cond)
+        if not self.builder.block.is_terminated:
+            self.builder.branch(loop_cond)
 
         self.builder.position_at_end(loop_cond)
         self.builder.cbranch(condition, loop_body, loop_end)
@@ -201,6 +235,14 @@ class LLVMCodeGenerator(CodeGenerator):
     def _generate_AstReturnStat(self, node):
         expr = self.generate_code(node.expr)
         self.builder.ret(expr)
+
+    def _generate_AstBreakStat(self, node):
+        self.builder.branch(self.loops[-1].loop_end)
+        self.break_stat_generation = True
+
+    def _generate_AstContinueStat(self, node):
+        self.builder.branch(self.loops[-1].continue_block())
+        self.break_stat_generation = True
 
     def _generate_AstNumber(self, node):
         return ir.Constant(IntType.llvm_type, int(node.value))

@@ -4,6 +4,8 @@ from .ast import (
     AstArgsLst,
     AstAssignStat,
     AstBinExpr,
+    AstBreakStat,
+    AstContinueStat,
     AstDeclStat,
     AstFnCall,
     AstFnDef,
@@ -151,6 +153,14 @@ class LilangParser(Parser):
     @_('RETURN expr ";"')
     def stat(self, p):
         return AstReturnStat(p.expr)
+
+    @_('BREAK ";"')
+    def stat(self, p):
+        return AstBreakStat()
+
+    @_('CONTINUE ";"')
+    def stat(self, p):
+        return AstContinueStat()
 
     @_(
         'expr PLUS expr',

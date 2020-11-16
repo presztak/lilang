@@ -125,6 +125,14 @@ class AstReturnStat(AstNode):
         self.expr = expr
 
 
+class AstBreakStat(AstNode):
+    pass
+
+
+class AstContinueStat(AstNode):
+    pass
+
+
 class AstFnDef(AstNode):
 
     def __init__(

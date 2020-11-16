@@ -31,7 +31,7 @@ class LLVMTestCase(unittest.TestCase):
             test_file_path, output_path=self.output_path
         )
         try:
-            subprocess.check_output([
+            result = subprocess.check_output([
                 self.output_path,
             ])
         except subprocess.CalledProcessError as e:
