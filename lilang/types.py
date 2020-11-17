@@ -7,6 +7,18 @@ class VoidType(object):
     llvm_type = ir.VoidType()
 
 
+class BoolType(object):
+
+    str_code = 'bool'
+    llvm_type = ir.IntType(1)
+
+
+class BoolArrayType(object):
+
+    str_code = 'bool[]'
+    llvm_type = ir.PointerType(BoolType.llvm_type)
+
+
 class IntType(object):
 
     str_code = 'int'

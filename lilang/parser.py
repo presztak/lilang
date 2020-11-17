@@ -4,6 +4,7 @@ from .ast import (
     AstArgsLst,
     AstAssignStat,
     AstBinExpr,
+    AstBool,
     AstBreakStat,
     AstContinueStat,
     AstDeclStat,
@@ -193,6 +194,10 @@ class LilangParser(Parser):
     @_('NUMBER')
     def expr(self, p):
         return AstNumber(p.NUMBER)
+
+    @_('TRUE', 'FALSE')
+    def expr(self, p):
+        return AstBool(p[0])
 
     @_('')
     def empty(self, p):

@@ -43,6 +43,12 @@ class AstNumber(AstNode):
         self.value = value
 
 
+class AstBool(AstNode):
+
+    def __init__(self, value):
+        self.value = value
+
+
 class AstVariable(AstNode):
 
     def __init__(self, identifier, index_expr=None):

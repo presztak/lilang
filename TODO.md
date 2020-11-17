@@ -6,7 +6,7 @@ TODO
 * [x] Support for 'else' clause
 * [x] 'For' loop
 * [x] Add 'continue', 'break' statements
-* [ ] Add bool
+* [x] Add bool
 * [ ] Char (String?) data types
 * [x] Support for declaring multiple variables in one line
 * [x] Support for extra assignment operators e.g. +=, -=, *=, /=

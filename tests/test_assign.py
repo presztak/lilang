@@ -108,3 +108,24 @@ class AssignmentTestCase(LLVMTestCase):
         '''
         result = self.run_code(code)
         self.assertEqual(result, '4\n10')
+
+    def test_bool_assignment(self):
+        code = '''
+            bool x = true;
+            if (x == true) {
+                printi(1);
+            }
+        '''
+        result = self.run_code(code)
+        self.assertEqual(result, '1')
+
+    def test_bool_array_assignment(self):
+        code = '''
+            bool[] a = [true, false, false, true];
+            bool x = a[3];
+            if (a[3] == true) {
+                printi(2);
+            }
+        '''
+        result = self.run_code(code)
+        self.assertEqual(result, '2')
