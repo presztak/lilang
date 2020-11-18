@@ -6,7 +6,7 @@ from llvmlite import ir
 
 from .codegen import CodeGenerator
 from .parser import LilangParser
-from .types import BoolArrayType, BoolType, IntArrayType, IntType, VoidType
+from .types import BoolType, IntType, LilangType, VoidType
 
 
 class LLVMVariable(object):
@@ -144,9 +144,17 @@ class LLVMCodeGenerator(CodeGenerator):
         node.expr.type = node.type
 
         result = self.generate_code(node.expr)
-        if node.type == BoolType.str_code:
+        lilang_type = LilangType.type_from_str(node.type)
+
+        if lilang_type.is_array:
+            self.variables[node.identifier] = LLVMVariable(
+                node.identifier,
+                node.type,
+                result
+            )
+        else:
             var_addr = self.builder.alloca(
-                BoolType.llvm_type, size=None, name=node.identifier
+                lilang_type.llvm_type, size=None, name=node.identifier
             )
             self.builder.store(result, var_addr)
             self.variables[node.identifier] = LLVMVariable(
@@ -154,28 +162,7 @@ class LLVMCodeGenerator(CodeGenerator):
                 node.type,
                 var_addr
             )
-        elif node.type == BoolArrayType.str_code:
-            self.variables[node.identifier] = LLVMVariable(
-                node.identifier,
-                node.type,
-                result
-            )
-        elif node.type == IntType.str_code:
-            var_addr = self.builder.alloca(
-                IntType.llvm_type, size=None, name=node.identifier
-            )
-            self.builder.store(result, var_addr)
-            self.variables[node.identifier] = LLVMVariable(
-                node.identifier,
-                node.type,
-                var_addr
-            )
-        elif node.type == IntArrayType.str_code:
-            self.variables[node.identifier] = LLVMVariable(
-                node.identifier,
-                node.type,
-                result
-            )
+
         return result
 
     def _generate_AstDeclStat(self, node):
@@ -273,9 +260,7 @@ class LLVMCodeGenerator(CodeGenerator):
 
     def _generate_AstLstExpr(self, node):
         result = []
-        lst_type = IntType.llvm_type
-        if node.type == BoolArrayType.str_code:
-            lst_type = BoolType.llvm_type
+        lst_type = LilangType.type_from_str(node.type).base_type.llvm_type
 
         for arg in node.args_lst.args_lst:
             result.append(self.generate_code(arg))
@@ -296,22 +281,9 @@ class LLVMCodeGenerator(CodeGenerator):
 
         var = self.variables[node.identifier]
         var_addr = var.address
-        if var.type == BoolType.str_code:
-            return self.builder.load(var_addr)
-        elif var.type == BoolArrayType.str_code:
-            index = ir.Constant(BoolType.llvm_type, 0)
-            if node.index_expr:
-                index = self.generate_code(node.index_expr)
+        lilang_type = LilangType.type_from_str(var.type)
 
-            var_addr = self.builder.gep(
-                var_addr, [index]
-            )
-            if node.index_expr:
-                return self.builder.load(var_addr)
-            return var_addr
-        elif var.type == IntType.str_code:
-            return self.builder.load(var_addr)
-        elif var.type == IntArrayType.str_code:
+        if lilang_type.is_array:
             index = ir.Constant(IntType.llvm_type, 0)
             if node.index_expr:
                 index = self.generate_code(node.index_expr)
@@ -322,30 +294,17 @@ class LLVMCodeGenerator(CodeGenerator):
             if node.index_expr:
                 return self.builder.load(var_addr)
             return var_addr
+        else:
+            return self.builder.load(var_addr)
 
     def _generate_AstFnDef(self, node):
         args = node.params_lst.params_lst
 
         fn_args = []
         for arg in args:
-            if arg[1] == IntArrayType.str_code:
-                fn_args.append(IntArrayType.llvm_type)
-            elif arg[1] == IntType.str_code:
-                fn_args.append(IntType.llvm_type)
-            elif arg[1] == BoolType.str_code:
-                fn_args.append(BoolType.llvm_type)
-            elif arg[1] == BoolArrayType.str_code:
-                fn_args.append(BoolArrayType.llvm_type)
+            fn_args.append(LilangType.type_from_str(arg[1]).llvm_type)
 
-        return_type = VoidType.llvm_type
-        if node.type == IntType.str_code:
-            return_type = IntType.llvm_type
-        elif node.type == IntArrayType.str_code:
-            return_type = IntArrayType.llvm_type
-        elif node.type == BoolType.str_code:
-            return_type = BoolType.llvm_type
-        elif node.type == BoolArrayType.str_code:
-            return_type = BoolArrayType.llvm_type
+        return_type = LilangType.type_from_str(node.type).llvm_type
 
         fn_type = ir.FunctionType(return_type, fn_args)
         fn = ir.Function(self.main_module, fn_type, name=node.name)
@@ -358,38 +317,22 @@ class LLVMCodeGenerator(CodeGenerator):
             self.builder = ir.IRBuilder(self.block)
 
             for index, arg in enumerate(args):
-                if arg[1] == IntType.str_code:
-                    alloca = self.builder.alloca(
-                        IntType.llvm_type, name=arg[0]
+                lilang_type = LilangType.type_from_str(arg[1])
+                if lilang_type.is_array:
+                    address = fn.args[index]
+                else:
+                    address = self.builder.alloca(
+                        lilang_type.llvm_type, name=arg[0]
                     )
-                    self.variables[arg[0]] = LLVMVariable(
-                        arg[0],
-                        arg[1],
-                        alloca
-                    )
-                    self.builder.store(fn.args[index], alloca)
-                elif arg[1] == IntArrayType.str_code:
-                    self.variables[arg[0]] = LLVMVariable(
-                        arg[0],
-                        arg[1],
-                        fn.args[index]
-                    )
-                elif arg[1] == BoolType.str_code:
-                    alloca = self.builder.alloca(
-                        BoolType.llvm_type, name=arg[0]
-                    )
-                    self.variables[arg[0]] = LLVMVariable(
-                        arg[0],
-                        arg[1],
-                        alloca
-                    )
-                    self.builder.store(fn.args[index], alloca)
-                elif arg[1] == BoolArrayType.str_code:
-                    self.variables[arg[0]] = LLVMVariable(
-                        arg[0],
-                        arg[1],
-                        fn.args[index]
-                    )
+
+                self.variables[arg[0]] = LLVMVariable(
+                    arg[0],
+                    arg[1],
+                    address
+                )
+
+                if not lilang_type.is_array:
+                    self.builder.store(fn.args[index], address)
 
             if node.stat_lst:
                 self.generate_code(node.stat_lst)
