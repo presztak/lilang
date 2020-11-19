@@ -129,3 +129,11 @@ class AssignmentTestCase(LLVMTestCase):
         '''
         result = self.run_code(code)
         self.assertEqual(result, '2')
+
+    def test_string_assignment(self):
+        code = '''
+            string s = "Hello world";
+            prints(s);
+        '''
+        result = self.run_code(code)
+        self.assertEqual(result, 'Hello world')

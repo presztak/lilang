@@ -20,6 +20,7 @@ from .ast import (
     AstProgram,
     AstReturnStat,
     AstStatLst,
+    AstString,
     AstVariable,
     AstWhileStat
 )
@@ -198,6 +199,10 @@ class LilangParser(Parser):
     @_('TRUE', 'FALSE')
     def expr(self, p):
         return AstBool(p[0])
+
+    @_('STRING')
+    def expr(self, p):
+        return AstString(p.STRING)
 
     @_('')
     def empty(self, p):

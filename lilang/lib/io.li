@@ -1,1 +1,2 @@
-int printi(int x);
+void printi(int x);
+void prints(string x);

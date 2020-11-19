@@ -7,10 +7,10 @@ class LilangLexer(Lexer):
         IF, ELSE, WHILE, RETURN, TYPE, ID, ASSIGN, NUMBER,
         PLUS, MINUS, TIMES, DIVIDE, LT, LE, GT, GE, EQ,
         AND, OR, PLUS_ASSIGN, MINUS_ASSIGN, TIMES_ASSIGN, DIVIDE_ASSIGN,
-        FOR, BREAK, CONTINUE, TRUE, FALSE
+        FOR, BREAK, CONTINUE, TRUE, FALSE, STRING
     ]
 
-    literals = {';', '(', ')', '{', '}', '[', ']', ','}
+    literals = {';', '(', ')', '{', '}', '[', ']', ',', '"'}
 
     ignore = ' \t\n'
 
@@ -23,7 +23,7 @@ class LilangLexer(Lexer):
     CONTINUE = r'continue'
     TRUE = r'true'
     FALSE = r'false'
-    TYPE = r'void|int\[\]|int|bool\[\]|bool'
+    TYPE = r'void|int\[\]|int|bool\[\]|bool|string'
     ID = r'[a-zA-Z][a-zA-Z]*'
     EQ = r'=='
     PLUS_ASSIGN = r'\+='
@@ -42,3 +42,4 @@ class LilangLexer(Lexer):
     GT = r'>'
     AND = r'&&'
     OR = r'\|\|'
+    STRING = r'\".*\"'

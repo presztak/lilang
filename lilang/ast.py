@@ -49,6 +49,12 @@ class AstBool(AstNode):
         self.value = value
 
 
+class AstString(AstNode):
+
+    def __init__(self, value):
+        self.value = value[1:-1] + "\0"
+
+
 class AstVariable(AstNode):
 
     def __init__(self, identifier, index_expr=None):

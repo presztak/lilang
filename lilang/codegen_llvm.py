@@ -258,6 +258,18 @@ class LLVMCodeGenerator(CodeGenerator):
             return ir.Constant(BoolType.llvm_type, 1)
         return ir.Constant(BoolType.llvm_type, 0)
 
+    def _generate_AstString(self, node):
+        alloca = self.builder.alloca(
+            ir.IntType(8), size=len(node.value)
+        )
+        # TODO: Store string without iteration it
+        for idx, num in enumerate(node.value):
+            el_addr = self.builder.gep(
+                alloca, [ir.Constant(IntType.llvm_type, idx)]
+            )
+            self.builder.store(ir.Constant(ir.IntType(8), ord(num)), el_addr)
+        return alloca
+
     def _generate_AstLstExpr(self, node):
         result = []
         lst_type = LilangType.type_from_str(node.type).base_type.llvm_type
@@ -266,8 +278,8 @@ class LLVMCodeGenerator(CodeGenerator):
             result.append(self.generate_code(arg))
 
         var_addr = self.builder.alloca(
-                lst_type, size=len(result)
-            )
+            lst_type, size=len(result)
+        )
 
         for idx, num in enumerate(result):
             # TODO: Here should be int type explicity
