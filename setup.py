@@ -11,8 +11,8 @@ class LilangBuildExt(build_ext):
 
 
 iolib = Extension(
-    'lilang/lib/libio',
-    sources=['lib/io.c'],
+    'lilang.lib.libio',
+    sources=['lilang/lib/io.c'],
     )
 
 setuptools.setup(

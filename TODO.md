@@ -9,6 +9,7 @@ TODO
 * [ ] Functions with a variable number of parameters
 * [ ] Structs
 * [ ] Imports
+* [ ] Possibility to use variable defined in outer scope
 
 ### Version 0.2.0
 
@@ -21,6 +22,4 @@ TODO
 * [x] Support for extra assignment operators e.g. +=, -=, *=, /=
 * [X] Possibility to print formatted strings (prints function for print strings at the moment)
 * [ ] Support for script arguments
-* [ ] Indenpendence from gcc (use lld?)
-* [ ] Possibility to use variable defined in outer scope
-* [ ] Distribiute .so files (where should be placed after installation?)
+* [x] Distribiute .so files (where should be placed after installation?)
