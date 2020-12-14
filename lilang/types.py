@@ -56,3 +56,11 @@ class StringType(LilangType):
     llvm_type = ir.PointerType(ir.IntType(8))
     is_array = True
     base_type = ir.IntType(8)
+
+
+class StringArrayType(LilangType):
+
+    str_code = 'string[]'
+    llvm_type = ir.PointerType(StringType.llvm_type)
+    is_array = True
+    base_type = StringType

@@ -10,16 +10,18 @@ TODO
 * [ ] Structs
 * [ ] Imports
 * [ ] Possibility to use variable defined in outer scope
+* [ ] Type casting
+* [ ] Multi dimensional arrays
 
 ### Version 0.2.0
 
-* [x] Support for 'else' clause
-* [x] 'For' loop
-* [x] Add 'continue', 'break' statements
-* [x] Add bool
+* [X] Support for 'else' clause
+* [X] 'For' loop
+* [X] Add 'continue', 'break' statements
+* [X] Add bool
 * [X] Char (String?) data types
-* [x] Support for declaring multiple variables in one line
-* [x] Support for extra assignment operators e.g. +=, -=, *=, /=
+* [X] Support for declaring multiple variables in one line
+* [X] Support for extra assignment operators e.g. +=, -=, *=, /=
 * [X] Possibility to print formatted strings (prints function for print strings at the moment)
-* [ ] Support for script arguments
-* [x] Distribiute .so files (where should be placed after installation?)
+* [X] Support for program arguments
+* [X] Distribiute .so files (where should be placed after installation?)

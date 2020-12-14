@@ -6,7 +6,7 @@ from llvmlite import ir
 
 from .codegen import CodeGenerator
 from .parser import LilangParser
-from .types import BoolType, IntType, LilangType, VoidType
+from .types import BoolType, IntType, LilangType, StringArrayType, VoidType
 
 
 class LLVMVariable(object):
@@ -57,10 +57,28 @@ class LLVMCodeGenerator(CodeGenerator):
 
     def create_main_module(self):
         self.main_module = ir.Module(name='main')
-        main_f_type = ir.FunctionType(VoidType.llvm_type, ())
+        main_f_type = ir.FunctionType(
+            VoidType.llvm_type, (IntType.llvm_type, StringArrayType.llvm_type)
+        )
         main_func = ir.Function(self.main_module, main_f_type, name='main')
         self.block = main_func.append_basic_block(name='entry')
         self.builder = ir.IRBuilder(self.block)
+
+        var_addr = self.builder.alloca(
+            IntType.llvm_type, size=None, name='argc'
+        )
+        self.builder.store(main_func.args[0], var_addr)
+        self.variables['argc'] = LLVMVariable(
+            'argc',
+            'int',
+            var_addr
+        )
+
+        self.variables['argv'] = LLVMVariable(
+            'argv',
+            'string[]',
+            main_func.args[1]
+        )
 
     def compile(self, str_code, exec_name):
 
