@@ -17,7 +17,7 @@ class LLVMTestCase(unittest.TestCase):
     def run_code(self, code):
         self.llvm_cg.compile_from_str(code, output_path=self.output_path)
         try:
-            subprocess.check_output([
+            result = subprocess.check_output([
                 self.output_path,
             ])
         except subprocess.CalledProcessError as e:

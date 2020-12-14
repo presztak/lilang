@@ -40,11 +40,11 @@ class AssignmentTestCase(LLVMTestCase):
     def test_int_minus_assignment(self):
         code = '''
             int x = 5;
-            x -= 5;
+            x -= 4;
             printi(x);
         '''
         result = self.run_code(code)
-        self.assertEqual(result, '0')
+        self.assertEqual(result, '1')
 
     def test_array_minus_assignment(self):
         code = '''
