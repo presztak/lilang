@@ -1,6 +1,18 @@
 Changelog
 =========
 
+### 0.2.0 December 16, 2020
+
+- Support for 'else' clause
+- 'for' loop
+- 'continue', 'break' statements
+- New types: bool, string
+- Support for declaring multiple variables in one line
+- Support for extra assignment operators e.g. +=, -=, *=, /=
+- 'prints' function
+- Support for program arguments
+
+
 ### 0.1.0 October 20, 2020
 
   - Assignment statement
