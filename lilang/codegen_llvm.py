@@ -87,8 +87,15 @@ class LLVMCodeGenerator(CodeGenerator):
         with open(os.path.join(self.lib_path, 'io.li')) as lib_script:
             lib = lib_script.read()
 
-        parser = LilangParser()
-        self.generate_code(parser.run(lib + str_code))
+        parser = LilangParser(lib)
+        self.generate_code(parser.run(lib))
+
+        parser = LilangParser(str_code)
+        ast = parser.run(str_code)
+        if not ast:
+            return
+        self.generate_code(ast)
+
         self.builder.ret_void()
 
         mod = llvm_binding.parse_assembly(str(self.main_module))

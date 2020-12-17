@@ -33,13 +33,13 @@ def get_code(code, filename):
 def main(lexer, parser, code, output_path, filename):
     if lexer is True:
         code = get_code(code, filename)
-        lexer = LilangLexer()
+        lexer = LilangLexer(code)
         for tok in lexer.tokenize(code):
             print('type=%r, value=%r' % (tok.type, tok.value))
     elif parser is True:
         code = get_code(code, filename)
         lexer = LilangLexer()
-        parser = LilangParser()
+        parser = LilangParser(code)
         result = parser.parse(lexer.tokenize(code))
         print(result)
     elif code:

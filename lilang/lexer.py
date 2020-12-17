@@ -1,5 +1,7 @@
 from sly import Lexer
 
+from .lib import column_from_index
+
 
 class LilangLexer(Lexer):
 
@@ -12,7 +14,7 @@ class LilangLexer(Lexer):
 
     literals = {';', '(', ')', '{', '}', '[', ']', ',', '"'}
 
-    ignore = ' \t\n'
+    ignore = ' \t'
 
     IF = r'if'
     ELSE = r'else'
@@ -43,3 +45,17 @@ class LilangLexer(Lexer):
     AND = r'&&'
     OR = r'\|\|'
     STRING = r'\".*\"'
+
+    def __init__(self, code):
+        super().__init__()
+        self.code = code
+
+    @_(r'\n+')
+    def ignore_newline(self, t):
+        self.lineno += len(t.value)
+
+    def error(self, t):
+        print(
+            f"Illegal character {t.value[0]} in line "
+            f"{self.lineno} column {column_from_index(self.code, t)}")
+        self.index += 1

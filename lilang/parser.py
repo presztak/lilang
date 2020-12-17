@@ -25,6 +25,7 @@ from .ast import (
     AstWhileStat
 )
 from .lexer import LilangLexer
+from .lib import column_from_index
 
 
 class LilangParser(Parser):
@@ -208,6 +209,23 @@ class LilangParser(Parser):
     def empty(self, p):
         pass
 
+    def __init__(self, code):
+        super().__init__()
+        self.code = code
+
     def run(self, data):
-        lexer = LilangLexer()
+        lexer = LilangLexer(self.code)
         return self.parse(lexer.tokenize(data))
+
+    def error(self, p):
+        if p:
+            if p.type == 'error':
+                self.errok()
+                return
+            print(
+                f"Syntax error near '{p.value}' at line "
+                f"{p.lineno} column {column_from_index(self.code, p)}"
+            )
+            self.errok()
+        else:
+            print("Syntax error at EOF")

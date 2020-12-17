@@ -2,6 +2,8 @@ import unittest
 import subprocess
 from lilang.codegen_llvm import LLVMCodeGenerator
 import os
+from io import StringIO
+from contextlib import redirect_stdout
 
 
 class LLVMTestCase(unittest.TestCase):
@@ -12,10 +14,17 @@ class LLVMTestCase(unittest.TestCase):
         self.llvm_cg = LLVMCodeGenerator()
 
     def tearDown(self):
-        os.remove(self.output_path)
+        if os.path.exists(self.output_path):
+            os.remove(self.output_path)
 
     def run_code(self, code):
-        self.llvm_cg.compile_from_str(code, output_path=self.output_path)
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            self.llvm_cg.compile_from_str(code, output_path=self.output_path)
+        compile_errors = stdout.getvalue()
+        if compile_errors:
+            return compile_errors.strip()
+
         try:
             result = subprocess.check_output([
                 self.output_path,
