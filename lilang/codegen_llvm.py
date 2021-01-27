@@ -314,6 +314,36 @@ class LLVMCodeGenerator(CodeGenerator):
             self.builder.store(num, el_addr)
         return var_addr
 
+    def _generate_AstStructLiteral(self, node):
+        result = []
+
+        for arg in node.args_lst.args_lst:
+            result.append(self.generate_code(arg))
+
+        var_addr = self.builder.alloca(
+            LilangType.type_from_str(node.type).llvm_type,
+            size=None
+        )
+
+        for idx, el in enumerate(result):
+            el_addr = self.builder.gep(
+                var_addr,
+                [
+                    ir.Constant(IntType.llvm_type, 0),
+                    ir.Constant(IntType.llvm_type, idx)
+                ]
+            )
+            self.builder.store(
+                ir.Constant(
+                    LilangType.type_from_str(
+                        node.type
+                    ).llvm_type.elements[idx],
+                    el.constant
+                ),
+                el_addr
+            )
+        return var_addr
+
     def _generate_AstVariable(self, node):
 
         var = self.variables[node.identifier]
@@ -333,6 +363,29 @@ class LLVMCodeGenerator(CodeGenerator):
             return var_addr
         else:
             return self.builder.load(var_addr)
+
+    def _generate_AstGetAttribute(self, node):
+
+        var_name = ''
+        if hasattr(node.variable, "attribute"):
+            var_name = node.variable.attribute
+        else:
+            var_name = node.variable.identifier
+        var = self.variables[var_name]
+        idx = 0
+        for field in LilangType.type_from_str(var.type).fields:
+            if field[0] == node.attribute:
+                break
+            idx += 1
+        var_addr = self.generate_code(node.variable)
+        var_addr = self.builder.gep(
+            var_addr,
+            [
+                ir.Constant(IntType.llvm_type, 0),
+                ir.Constant(IntType.llvm_type, idx)
+            ]
+        )
+        return self.builder.load(var_addr)
 
     def _generate_AstFnDef(self, node):
         args = node.params_lst.params_lst
@@ -384,3 +437,22 @@ class LLVMCodeGenerator(CodeGenerator):
             arg = self.generate_code(arg_expr)
             args.append(arg)
         return self.builder.call(self.functions[node.name], args)
+
+    def _generate_AstStructStat(self, node):
+        fields = node.struct_fields.params_lst
+
+        fields_types = []
+        for field in fields:
+            fields_types.append(LilangType.type_from_str(field[1]).llvm_type)
+
+        type(
+            f"Struct{node.name}Type",
+            (LilangType,),
+            {
+                "str_code": node.name,
+                "llvm_type": ir.LiteralStructType(fields_types),
+                "base_type": None,
+                "is_array": True,
+                "fields": fields
+            }
+        )

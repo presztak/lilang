@@ -11,6 +11,7 @@ from .ast import (
     AstFnCall,
     AstFnDef,
     AstForStat,
+    AstGetAttribute,
     AstIfStat,
     AstInitDecl,
     AstInitDeclList,
@@ -21,6 +22,8 @@ from .ast import (
     AstReturnStat,
     AstStatLst,
     AstString,
+    AstStructLiteral,
+    AstStructStat,
     AstVariable,
     AstWhileStat
 )
@@ -69,13 +72,13 @@ class LilangParser(Parser):
     def params_lst(self, p):
         return AstParamsLst(None, None)
 
-    @_('TYPE ID')
+    @_('var_type ID')
     def params_lst(self, p):
-        return AstParamsLst(p.ID, p.TYPE)
+        return AstParamsLst(p.ID, p.var_type)
 
-    @_('params_lst "," TYPE ID')
+    @_('params_lst "," var_type ID')
     def params_lst(self, p):
-        return AstParamsLst(p.ID, p.TYPE, p.params_lst)
+        return AstParamsLst(p.ID, p.var_type, p.params_lst)
 
     @_('expr ";"')
     def stat(self, p):
@@ -85,17 +88,17 @@ class LilangParser(Parser):
     def stat(self, p):
         return p.stat_lst
 
-    @_('TYPE ID "(" params_lst ")" "{" stat_lst "}"')
+    @_('var_type ID "(" params_lst ")" "{" stat_lst "}"')
     def stat(self, p):
-        return AstFnDef(p.TYPE, p.ID, p.stat_lst, p.params_lst)
+        return AstFnDef(p.var_type, p.ID, p.stat_lst, p.params_lst)
 
-    @_('TYPE ID "(" params_lst ")" "{" "}"')
+    @_('var_type ID "(" params_lst ")" "{" "}"')
     def stat(self, p):
-        return AstFnDef(p.TYPE, p.ID, None, p.params_lst)
+        return AstFnDef(p.var_type, p.ID, None, p.params_lst)
 
-    @_('TYPE ID "(" params_lst ")" ";"')
+    @_('var_type ID "(" params_lst ")" ";"')
     def stat(self, p):
-        return AstFnDef(p.TYPE, p.ID, None, p.params_lst, declaration=True)
+        return AstFnDef(p.var_type, p.ID, None, p.params_lst, declaration=True)
 
     @_('ID "(" args_lst ")"')
     def expr(self, p):
@@ -113,9 +116,9 @@ class LilangParser(Parser):
     def init_decl_lst(self, p):
         return AstInitDeclList(p.init_decl, p.init_decl_lst)
 
-    @_('TYPE init_decl_lst ";"')
+    @_('var_type init_decl_lst ";"')
     def stat(self, p):
-        return AstDeclStat(p.TYPE, p.init_decl_lst)
+        return AstDeclStat(p.var_type, p.init_decl_lst)
 
     @_(
         'ID ASSIGN expr ";"',
@@ -165,6 +168,18 @@ class LilangParser(Parser):
     def stat(self, p):
         return AstContinueStat()
 
+    @_('var_type ID ";"')
+    def struct_fields(self, p):
+        return AstParamsLst(p.ID, p.var_type)
+
+    @_('struct_fields  var_type ID ";"')
+    def struct_fields(self, p):
+        return AstParamsLst(p.ID, p.var_type, p.struct_fields)
+
+    @_('STRUCT ID "{" struct_fields "}"')
+    def stat(self, p):
+        return AstStructStat(p.ID, p.struct_fields)
+
     @_(
         'expr PLUS expr',
         'expr MINUS expr',
@@ -185,9 +200,17 @@ class LilangParser(Parser):
     def expr(self, p):
         return AstLstExpr(p.args_lst)
 
+    @_('"{" args_lst "}"')
+    def expr(self, p):
+        return AstStructLiteral(p.args_lst)
+
     @_('ID "[" expr "]"')
     def expr(self, p):
         return AstVariable(p.ID, p.expr)
+
+    @_('expr "." ID')
+    def expr(self, p):
+        return AstGetAttribute(p.expr, p.ID)
 
     @_('ID')
     def expr(self, p):
@@ -204,6 +227,13 @@ class LilangParser(Parser):
     @_('STRING')
     def expr(self, p):
         return AstString(p.STRING)
+
+    @_(
+        'BASE_TYPE',
+        'ID'
+    )
+    def var_type(self, p):
+        return p[0]
 
     @_('')
     def empty(self, p):

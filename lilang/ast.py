@@ -62,6 +62,13 @@ class AstVariable(AstNode):
         self.index_expr = index_expr
 
 
+class AstGetAttribute(AstNode):
+
+    def __init__(self, variable, attribute):
+        self.variable = variable
+        self.attribute = attribute
+
+
 class AstBinExpr(AstNode):
 
     def __init__(self, expr0, expr1, operator):
@@ -71,6 +78,11 @@ class AstBinExpr(AstNode):
 
 
 class AstLstExpr(AstNode):
+    def __init__(self, args_lst):
+        self.args_lst = args_lst
+
+
+class AstStructLiteral(AstNode):
     def __init__(self, args_lst):
         self.args_lst = args_lst
 
@@ -143,6 +155,12 @@ class AstBreakStat(AstNode):
 
 class AstContinueStat(AstNode):
     pass
+
+
+class AstStructStat(AstNode):
+    def __init__(self, name, struct_fields):
+        self.name = name
+        self.struct_fields = struct_fields
 
 
 class AstFnDef(AstNode):

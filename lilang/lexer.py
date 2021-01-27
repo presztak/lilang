@@ -6,13 +6,13 @@ from .lib import column_from_index
 class LilangLexer(Lexer):
 
     tokens = [
-        IF, ELSE, WHILE, RETURN, TYPE, ID, ASSIGN, NUMBER,
+        IF, ELSE, WHILE, RETURN, BASE_TYPE, ID, ASSIGN, NUMBER,
         PLUS, MINUS, TIMES, DIVIDE, LT, LE, GT, GE, EQ,
         AND, OR, PLUS_ASSIGN, MINUS_ASSIGN, TIMES_ASSIGN, DIVIDE_ASSIGN,
-        FOR, BREAK, CONTINUE, TRUE, FALSE, STRING
+        FOR, BREAK, CONTINUE, TRUE, FALSE, STRING, STRUCT
     ]
 
-    literals = {';', '(', ')', '{', '}', '[', ']', ',', '"'}
+    literals = {';', '(', ')', '{', '}', '[', ']', ',', '"', '.'}
 
     ignore = ' \t'
 
@@ -25,7 +25,8 @@ class LilangLexer(Lexer):
     CONTINUE = r'continue'
     TRUE = r'true'
     FALSE = r'false'
-    TYPE = r'void|int\[\]|int|bool\[\]|bool|string'
+    STRUCT = r'struct'
+    BASE_TYPE = r'void|int\[\]|int|bool\[\]|bool|string'
     ID = r'[a-zA-Z][a-zA-Z]*'
     EQ = r'=='
     PLUS_ASSIGN = r'\+='

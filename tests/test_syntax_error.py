@@ -13,10 +13,11 @@ class SyntaxErrorTestCase(LLVMTestCase):
         )
 
     def test_syntax_error(self):
-        code = """in k = 0;"""
+        code = """int k = p0;"""
         result = self.run_code(code)
         self.assertEqual(
             result,
-            "Syntax error near 'k' at line 1 column 4\n"
-            "Syntax error near '=' at line 1 column 6"
+            "Syntax error near '0' at line 1 column 10\n"
+            "Syntax error near ';' at line 1 column 11\n"
+            "Syntax error at EOF"
         )
