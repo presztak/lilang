@@ -18,13 +18,13 @@ class AstStatLst(AstNode):
 
 
 class AstParamsLst(AstNode):
-    def __init__(self, param, type, params_lst=None):
+    def __init__(self, param, type, params_lst=None, var_args=False):
         if not param:
             self.params_lst = []
         elif params_lst:
-            self.params_lst = params_lst.params_lst + [(param, type)]
+            self.params_lst = params_lst.params_lst + [(param, type, var_args)]
         else:
-            self.params_lst = [(param, type)]
+            self.params_lst = [(param, type, var_args)]
 
 
 class AstArgsLst(AstNode):

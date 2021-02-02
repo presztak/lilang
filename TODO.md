@@ -6,7 +6,7 @@ TODO
 * [X] Support for compilation errors
 * [ ] Support for string comparation operation
 * [ ] String representation as a struct
-* [ ] Functions with a variable number of parameters
+* [X] Functions with a variable number of parameters (int, bool)
 * [X] Structs
 * [ ] Imports
 * [ ] Possibility to use variable defined in outer scope

@@ -9,7 +9,7 @@ class LilangLexer(Lexer):
         IF, ELSE, WHILE, RETURN, BASE_TYPE, ID, ASSIGN, NUMBER,
         PLUS, MINUS, TIMES, DIVIDE, LT, LE, GT, GE, EQ,
         AND, OR, PLUS_ASSIGN, MINUS_ASSIGN, TIMES_ASSIGN, DIVIDE_ASSIGN,
-        FOR, BREAK, CONTINUE, TRUE, FALSE, STRING, STRUCT
+        FOR, BREAK, CONTINUE, TRUE, FALSE, STRING, STRUCT, ELLIPSIS
     ]
 
     literals = {';', '(', ')', '{', '}', '[', ']', ',', '"', '.'}
@@ -46,6 +46,7 @@ class LilangLexer(Lexer):
     AND = r'&&'
     OR = r'\|\|'
     STRING = r'\".*\"'
+    ELLIPSIS = r'\.\.\.'
 
     def __init__(self, code):
         super().__init__()

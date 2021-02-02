@@ -17,6 +17,13 @@ class LLVMVariable(object):
         self.address = address
 
 
+class LLVMFunction(object):
+
+    def __init__(self, function, var_arg=False):
+        self.function = function
+        self.var_arg = var_arg
+
+
 class LLVMLoop(object):
 
     def __init__(self, loop_cond, loop_body, loop_end, loop_step=None):
@@ -83,6 +90,14 @@ class LLVMCodeGenerator(CodeGenerator):
     def compile(self, str_code, exec_name):
 
         object_file_name = f'{exec_name}.o'
+        self.va_start = self.main_module.declare_intrinsic(
+            'llvm.va_start',
+            fnty=ir.FunctionType(ir.VoidType(), [ir.IntType(8).as_pointer()])
+        )
+        self.va_end = self.main_module.declare_intrinsic(
+            'llvm.va_end',
+            fnty=ir.FunctionType(ir.VoidType(), [ir.IntType(8).as_pointer()])
+        )
 
         with open(os.path.join(self.lib_path, 'io.li')) as lib_script:
             lib = lib_script.read()
@@ -391,14 +406,19 @@ class LLVMCodeGenerator(CodeGenerator):
         args = node.params_lst.params_lst
 
         fn_args = []
+        var_arg = False
         for arg in args:
+            if arg[2] is True:
+                var_arg = True
+                fn_args.append(ir.IntType(32))
+                break
             fn_args.append(LilangType.type_from_str(arg[1]).llvm_type)
 
         return_type = LilangType.type_from_str(node.type).llvm_type
 
-        fn_type = ir.FunctionType(return_type, fn_args)
+        fn_type = ir.FunctionType(return_type, fn_args, var_arg=var_arg)
         fn = ir.Function(self.main_module, fn_type, name=node.name)
-        self.functions[node.name] = fn
+        self.functions[node.name] = LLVMFunction(fn, var_arg=var_arg)
 
         if not node.declaration:
             last_block = self.block
@@ -407,6 +427,28 @@ class LLVMCodeGenerator(CodeGenerator):
             self.builder = ir.IRBuilder(self.block)
 
             for index, arg in enumerate(args):
+                if arg[2] is True:
+                    var_addr = self.builder.alloca(
+                        LilangType.type_from_str('valist').llvm_type,
+                        size=None,
+                        name='elipsis'
+                    )
+                    var_addr_i8 = self.builder.bitcast(
+                        var_addr,
+                        ir.IntType(8).as_pointer()
+                    )
+                    self.builder.call(self.va_start, [var_addr_i8])
+                    result = self.builder.call(
+                        self.main_module.get_global(f'vaargs{arg[1]}'),
+                        [fn.args[index], var_addr_i8]
+                    )
+                    self.builder.call(self.va_end, [var_addr_i8])
+                    self.variables[arg[0]] = LLVMVariable(
+                        arg[0],
+                        f'{arg[1]}[]',
+                        result
+                    )
+                    break
                 lilang_type = LilangType.type_from_str(arg[1])
                 if lilang_type.is_array:
                     address = fn.args[index]
@@ -433,10 +475,18 @@ class LLVMCodeGenerator(CodeGenerator):
 
     def _generate_AstFnCall(self, node):
         args = []
+        fn = self.functions[node.name]
+
         for arg_expr in node.args_lst.args_lst:
             arg = self.generate_code(arg_expr)
             args.append(arg)
-        return self.builder.call(self.functions[node.name], args)
+        if fn.var_arg:
+            var_arg_len = len(args) - len(fn.function.args) + 1
+            args.insert(
+                len(fn.function.args) - 1,
+                ir.Constant(ir.IntType(32), var_arg_len)
+            )
+        return self.builder.call(fn.function, args)
 
     def _generate_AstStructStat(self, node):
         fields = node.struct_fields.params_lst

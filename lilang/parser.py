@@ -76,9 +76,17 @@ class LilangParser(Parser):
     def params_lst(self, p):
         return AstParamsLst(p.ID, p.var_type)
 
+    @_('var_type ELLIPSIS ID')
+    def params_lst(self, p):
+        return AstParamsLst(p.ID, p.var_type, var_args=True)
+
     @_('params_lst "," var_type ID')
     def params_lst(self, p):
         return AstParamsLst(p.ID, p.var_type, p.params_lst)
+
+    @_('params_lst "," var_type ELLIPSIS ID')
+    def params_lst(self, p):
+        return AstParamsLst(p.ID, p.var_type, p.params_lst, var_args=True)
 
     @_('expr ";"')
     def stat(self, p):
