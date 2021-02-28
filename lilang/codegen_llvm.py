@@ -5,7 +5,7 @@ import llvmlite.binding as llvm_binding
 from llvmlite import ir
 
 from .codegen import CodeGenerator
-from .parser import LilangParser
+from .symtab import SymTab
 from .types import BoolType, IntType, LilangType, StringArrayType, VoidType
 
 
@@ -102,11 +102,10 @@ class LLVMCodeGenerator(CodeGenerator):
         with open(os.path.join(self.lib_path, 'io.li')) as lib_script:
             lib = lib_script.read()
 
-        parser = LilangParser(lib)
-        self.generate_code(parser.run(lib))
+        symtab = SymTab()
+        self.generate_code(symtab.gen(lib))
 
-        parser = LilangParser(str_code)
-        ast = parser.run(str_code)
+        ast = symtab.gen(str_code)
         if not ast:
             return
         self.generate_code(ast)

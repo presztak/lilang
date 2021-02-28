@@ -31,7 +31,7 @@ from .lexer import LilangLexer
 from .lib import column_from_index
 
 
-class LilangParser(Parser):
+class ModuleParser(Parser):
     tokens = LilangLexer.tokens
 
     precedence = (
@@ -251,9 +251,9 @@ class LilangParser(Parser):
         super().__init__()
         self.code = code
 
-    def run(self, data):
+    def run(self):
         lexer = LilangLexer(self.code)
-        return self.parse(lexer.tokenize(data))
+        return self.parse(lexer.tokenize(self.code))
 
     def error(self, p):
         if p:

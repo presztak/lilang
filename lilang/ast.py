@@ -40,24 +40,28 @@ class AstArgsLst(AstNode):
 class AstNumber(AstNode):
 
     def __init__(self, value):
+        self.type = "int"
         self.value = value
 
 
 class AstBool(AstNode):
 
     def __init__(self, value):
+        self.type = "bool"
         self.value = value
 
 
 class AstString(AstNode):
 
     def __init__(self, value):
+        self.type = "string"
         self.value = value[1:-1] + "\0"
 
 
 class AstVariable(AstNode):
 
     def __init__(self, identifier, index_expr=None):
+        self.type = None
         self.identifier = identifier
         self.index_expr = index_expr
 
@@ -72,6 +76,7 @@ class AstGetAttribute(AstNode):
 class AstBinExpr(AstNode):
 
     def __init__(self, expr0, expr1, operator):
+        self.type = None
         self.expr0 = expr0
         self.expr1 = expr1
         self.operator = operator
@@ -178,5 +183,6 @@ class AstFnDef(AstNode):
 class AstFnCall(AstNode):
 
     def __init__(self, name, args_lst=None):
+        self.type = None
         self.name = name
         self.args_lst = args_lst

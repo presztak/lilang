@@ -45,7 +45,7 @@ class LilangLexer(Lexer):
     GT = r'>'
     AND = r'&&'
     OR = r'\|\|'
-    STRING = r'\".*\"'
+    STRING = r'"[^"]*"'
     ELLIPSIS = r'\.\.\.'
 
     def __init__(self, code):

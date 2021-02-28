@@ -2,7 +2,7 @@ import click
 
 from .codegen_llvm import LLVMCodeGenerator
 from .lexer import LilangLexer
-from .parser import LilangParser
+from .parser import ModuleParser
 
 
 class Lilang(object):
@@ -39,7 +39,7 @@ def main(lexer, parser, code, output_path, filename):
     elif parser is True:
         code = get_code(code, filename)
         lexer = LilangLexer(code)
-        parser = LilangParser(code)
+        parser = ModuleParser(code)
         result = parser.parse(lexer.tokenize(code))
         print(result)
     elif code:
