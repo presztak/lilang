@@ -40,6 +40,8 @@ class LLVMLoop(object):
 
 class LLVMCodeGenerator(CodeGenerator):
 
+    libs = ["io.li", "str.li", "vaarg.li"]
+
     def __init__(self):
         super().__init__()
 
@@ -50,6 +52,8 @@ class LLVMCodeGenerator(CodeGenerator):
         self.functions = {}
         self.loops = []
         self.break_stat_generation = False
+
+        self.symtab = SymTab()
 
         llvm_binding.initialize()
         llvm_binding.initialize_native_target()
@@ -87,6 +91,20 @@ class LLVMCodeGenerator(CodeGenerator):
             main_func.args[1]
         )
 
+    def compile_libs(self):
+        for lib in self.libs:
+            with open(os.path.join(self.lib_path, lib)) as lib_script:
+                lib_code = lib_script.read()
+                self.generate_code(self.symtab.gen(lib_code))
+
+    def libs_paths(self):
+        result = []
+        for lib in self.libs:
+            result.append(
+                os.path.join(self.lib_path, f"lib{lib.split('.')[0]}.so")
+            )
+        return result
+
     def compile(self, str_code, exec_name):
 
         object_file_name = f'{exec_name}.o'
@@ -99,13 +117,8 @@ class LLVMCodeGenerator(CodeGenerator):
             fnty=ir.FunctionType(ir.VoidType(), [ir.IntType(8).as_pointer()])
         )
 
-        with open(os.path.join(self.lib_path, 'io.li')) as lib_script:
-            lib = lib_script.read()
-
-        symtab = SymTab()
-        self.generate_code(symtab.gen(lib))
-
-        ast = symtab.gen(str_code)
+        self.compile_libs()
+        ast = self.symtab.gen(str_code)
         if not ast:
             return
         self.generate_code(ast)
@@ -124,7 +137,7 @@ class LLVMCodeGenerator(CodeGenerator):
             '-o',
             os.path.join(self.bin_path, exec_name),
             os.path.join(self.bin_path, object_file_name),
-            os.path.join(self.lib_path, "libio.so")
+            *self.libs_paths()
         ])
         os.remove(os.path.join(self.bin_path, object_file_name))
 

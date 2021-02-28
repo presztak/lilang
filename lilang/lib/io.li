@@ -1,11 +1,3 @@
-struct valist {
-    int a;
-    int b;
-    string c;
-    string d;
-}
+
 void printi(int x);
 void prints(string x);
-bool[] vaargsbool(int n, string a);
-int[] vaargsint(int n, string a);
-bool llstrcmp(string a, string b, string op);

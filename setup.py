@@ -15,6 +15,16 @@ iolib = Extension(
     sources=['lilang/lib/io.c'],
     )
 
+strlib = Extension(
+    'lilang.lib.libstr',
+    sources=['lilang/lib/str.c'],
+    )
+
+vaarglib = Extension(
+    'lilang.lib.libvaarg',
+    sources=['lilang/lib/vaarg.c'],
+    )
+
 setuptools.setup(
     name="lilang",
     version="0.1.0",
@@ -22,7 +32,7 @@ setuptools.setup(
     author_email="piotr.resztak@gmail.com",
     description="Lilang package",
     packages=setuptools.find_packages(),
-    package_data={'lilang': ['lib/io.li']},
+    package_data={'lilang': ['lib/io.li', 'lib/str.li', 'lib/ivaarg.li']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -47,5 +57,5 @@ setuptools.setup(
     cmdclass={
         'build_ext': LilangBuildExt,
     },
-    ext_modules=[iolib]
+    ext_modules=[iolib, strlib, vaarglib]
 )
