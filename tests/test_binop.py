@@ -30,3 +30,43 @@ class BinOpTestCase(LLVMTestCase):
         '''
         result = self.run_code(code)
         self.assertEqual(result, '2')
+
+    def test_str_cmp_gt_ok(self):
+        code = '''
+            if ("b" > "a") {
+                prints("ok");
+            }
+        '''
+        result = self.run_code(code)
+        self.assertEqual(result, 'ok')
+
+    def test_str_cmp_lt_nok(self):
+        code = '''
+            if ("b" < "a") {
+                prints("ok");
+            }
+        '''
+        result = self.run_code(code)
+        self.assertEqual(result, b'')
+
+    def test_str_cmp_eq_ok(self):
+        code = '''
+            string a = "a";
+            string b = "a";
+            if (a == b) {
+                prints("ok");
+            }
+        '''
+        result = self.run_code(code)
+        self.assertEqual(result, 'ok')
+
+    def test_str_cmp_gte_ok(self):
+        code = '''
+            string a = "a";
+            string b = "a";
+            if (a >= b) {
+                prints("ok");
+            }
+        '''
+        result = self.run_code(code)
+        self.assertEqual(result, 'ok')

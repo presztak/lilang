@@ -143,20 +143,37 @@ class LLVMCodeGenerator(CodeGenerator):
         expr0 = self.generate_code(node.expr0)
         expr1 = self.generate_code(node.expr1)
 
-        if node.operator == '+':
-            return self.builder.add(expr0, expr1)
-        elif node.operator == '-':
-            return self.builder.sub(expr0, expr1)
-        elif node.operator == '*':
-            return self.builder.mul(expr0, expr1)
-        elif node.operator == '/':
-            return self.builder.sdiv(expr0, expr1)
-        elif node.operator == '&&':
-            return self.builder.and_(expr0, expr1)
-        elif node.operator == '||':
-            return self.builder.or_(expr0, expr1)
+        if node.expr0.type == "string":
+            op = node.operator
+            const = ir.Constant(
+                ir.ArrayType(ir.IntType(8), len(op)),
+                bytearray(op, encoding='ascii')
+            )
+            alloca = self.builder.alloca(const.type)
+            self.builder.store(const, alloca)
+            return self.builder.call(
+                self.main_module.get_global('llstrcmp'),
+                [
+                    expr0, expr1,
+                    self.builder.bitcast(alloca, ir.IntType(8).as_pointer())
+                ]
+            )
         else:
-            return self.builder.icmp_signed(node.operator, expr0, expr1)
+            # int operations
+            if node.operator == '+':
+                return self.builder.add(expr0, expr1)
+            elif node.operator == '-':
+                return self.builder.sub(expr0, expr1)
+            elif node.operator == '*':
+                return self.builder.mul(expr0, expr1)
+            elif node.operator == '/':
+                return self.builder.sdiv(expr0, expr1)
+            elif node.operator == '&&':
+                return self.builder.and_(expr0, expr1)
+            elif node.operator == '||':
+                return self.builder.or_(expr0, expr1)
+            else:
+                return self.builder.icmp_signed(node.operator, expr0, expr1)
 
     def _generate_AstAssignStat(self, node):
         result = self.generate_code(node.expr)
