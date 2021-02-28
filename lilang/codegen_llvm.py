@@ -310,16 +310,13 @@ class LLVMCodeGenerator(CodeGenerator):
         return ir.Constant(BoolType.llvm_type, 0)
 
     def _generate_AstString(self, node):
-        alloca = self.builder.alloca(
-            ir.IntType(8), size=len(node.value)
+        str_val = ir.Constant(
+            ir.ArrayType(ir.IntType(8), len(node.value)),
+            bytearray(node.value, encoding='ascii')
         )
-        # TODO: Store string without iteration it
-        for idx, num in enumerate(node.value):
-            el_addr = self.builder.gep(
-                alloca, [ir.Constant(IntType.llvm_type, idx)]
-            )
-            self.builder.store(ir.Constant(ir.IntType(8), ord(num)), el_addr)
-        return alloca
+        alloca = self.builder.alloca(str_val.type)
+        self.builder.store(str_val, alloca)
+        return self.builder.bitcast(alloca, ir.IntType(8).as_pointer())
 
     def _generate_AstLstExpr(self, node):
         result = []
