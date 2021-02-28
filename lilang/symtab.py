@@ -30,6 +30,7 @@ class SymTab(object):
         pass
 
     def _walk_AstStructLiteral(self, node, data):
+        node.type = data["type"]
         for arg in node.args_lst.args_lst:
             self.walk(arg)
 
@@ -81,7 +82,8 @@ class SymTab(object):
 
     def _walk_AstInitDecl(self, node, data):
         self.variables[node.identifier] = data["type"]
-        self.walk(node.expr)
+        node.type = data["type"]
+        self.walk(node.expr, data)
 
     def _walk_AstWhileStat(self, node, data):
         self.walk(node.condition)
@@ -102,6 +104,7 @@ class SymTab(object):
             self.walk(node.else_stat_lst)
 
     def _walk_AstLstExpr(self, node, data):
+        node.type = data["type"]
         for arg in node.args_lst.args_lst:
             self.walk(arg)
 

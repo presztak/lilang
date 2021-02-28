@@ -179,9 +179,6 @@ class LLVMCodeGenerator(CodeGenerator):
         return result
 
     def _generate_AstInitDecl(self, node):
-        # Pass down type of variable
-        node.expr.type = node.type
-
         result = self.generate_code(node.expr)
         lilang_type = LilangType.type_from_str(node.type)
 
@@ -206,8 +203,6 @@ class LLVMCodeGenerator(CodeGenerator):
 
     def _generate_AstDeclStat(self, node):
         for init_decl in node.init_decl_lst.init_decl_lst:
-            # Pass info about type to child nodes
-            init_decl.type = node.type
             self.generate_code(init_decl)
 
     def _generate_AstIfStat(self, node):
