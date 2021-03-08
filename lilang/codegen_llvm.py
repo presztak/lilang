@@ -343,9 +343,8 @@ class LLVMCodeGenerator(CodeGenerator):
         )
 
         for idx, num in enumerate(result):
-            # TODO: Here should be int type explicity
             el_addr = self.builder.gep(
-                var_addr, [ir.Constant(IntType.llvm_type, idx)]
+                var_addr, [ir.Constant(ir.IntType(32), idx)]
             )
             self.builder.store(num, el_addr)
         return var_addr
