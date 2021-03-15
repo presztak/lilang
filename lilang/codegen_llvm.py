@@ -537,6 +537,15 @@ class LLVMCodeGenerator(CodeGenerator):
             )
         return self.builder.call(fn.function, args)
 
+    def _generate_AstCastExpr(self, node):
+        val = self.generate_code(node.expr)
+        new_type = LilangType.type_from_str(node.var_type.type).llvm_type
+        if val.type.width > new_type.width:
+            return self.builder.trunc(val, new_type)
+        elif val.type.width < new_type.width:
+            return self.builder.zext(val, new_type)
+        return val
+
     def _generate_AstStructStat(self, node):
         fields = node.struct_fields.params_lst
 

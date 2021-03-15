@@ -10,5 +10,5 @@ TODO
 * [X] Structs
 * [ ] Imports
 * [ ] Scopes
-* [ ] Type casting
+* [X] Type casting
 * [X] Multi dimensional arrays

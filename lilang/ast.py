@@ -200,3 +200,10 @@ class AstFnCall(AstNode):
         self.type = None
         self.name = name
         self.args_lst = args_lst
+
+
+class AstCastExpr(AstNode):
+
+    def __init__(self, var_type, expr):
+        self.var_type = var_type
+        self.expr = expr

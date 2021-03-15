@@ -6,6 +6,7 @@ from .ast import (
     AstBinExpr,
     AstBool,
     AstBreakStat,
+    AstCastExpr,
     AstContinueStat,
     AstDeclStat,
     AstFnCall,
@@ -212,6 +213,10 @@ class ModuleParser(Parser):
     @_('"{" args_lst "}"')
     def expr(self, p):
         return AstStructLiteral(p.args_lst)
+
+    @_(' var_type "(" expr ")"')
+    def expr(self, p):
+        return AstCastExpr(p.var_type, p.expr)
 
     @_('ID "[" expr "]"')
     def get_expr(self, p):

@@ -116,6 +116,9 @@ class SymTab(object):
         for arg in node.args_lst.args_lst:
             self.walk(arg, data)
 
+    def _walk_AstCastExpr(self, node, data):
+        pass
+
     def _walk_AstBreakStat(self, node, data):
         pass
 
