@@ -26,7 +26,7 @@ class LilangLexer(Lexer):
     TRUE = r'true'
     FALSE = r'false'
     STRUCT = r'struct'
-    BASE_TYPE = r'void|int\[\]|int|bool\[\]|bool|string'
+    BASE_TYPE = r'void|int|bool|string'
     ID = r'[a-zA-Z][a-zA-Z]*'
     EQ = r'=='
     PLUS_ASSIGN = r'\+='

@@ -6,15 +6,19 @@ from llvmlite import ir
 
 from .codegen import CodeGenerator
 from .symtab import SymTab
-from .types import BoolType, IntType, LilangType, StringArrayType, VoidType
+from .types import BoolType, IntType, LilangType, VoidType
 
 
 class LLVMVariable(object):
 
-    def __init__(self, identifier, type, address):
+    def __init__(
+        self, identifier, type, array_depth, address, is_struct=False
+    ):
         self.identifier = identifier
         self.type = type
+        self.array_depth = array_depth
         self.address = address
+        self.is_struct = is_struct
 
 
 class LLVMFunction(object):
@@ -69,7 +73,8 @@ class LLVMCodeGenerator(CodeGenerator):
     def create_main_module(self):
         self.main_module = ir.Module(name='main')
         main_f_type = ir.FunctionType(
-            VoidType.llvm_type, (IntType.llvm_type, StringArrayType.llvm_type)
+            VoidType.llvm_type,
+            (IntType.llvm_type, ir.PointerType(ir.PointerType(ir.IntType(8))))
         )
         main_func = ir.Function(self.main_module, main_f_type, name='main')
         self.block = main_func.append_basic_block(name='entry')
@@ -82,12 +87,14 @@ class LLVMCodeGenerator(CodeGenerator):
         self.variables['argc'] = LLVMVariable(
             'argc',
             'int',
+            0,
             var_addr
         )
 
         self.variables['argv'] = LLVMVariable(
             'argv',
-            'string[]',
+            'string',
+            1,
             main_func.args[1]
         )
 
@@ -156,7 +163,12 @@ class LLVMCodeGenerator(CodeGenerator):
         expr0 = self.generate_code(node.expr0)
         expr1 = self.generate_code(node.expr1)
 
-        if node.expr0.type == "string":
+        # TODO: Temporary workeround
+        expr_type = node.expr0.type
+        if hasattr(expr_type, "type"):
+            expr_type = expr_type.type
+
+        if expr_type == "string":
             op = node.operator
             const = ir.Constant(
                 ir.ArrayType(ir.IntType(8), len(op)),
@@ -210,13 +222,15 @@ class LLVMCodeGenerator(CodeGenerator):
 
     def _generate_AstInitDecl(self, node):
         result = self.generate_code(node.expr)
-        lilang_type = LilangType.type_from_str(node.type)
+        lilang_type = LilangType.type_from_str(node.type.type)
 
-        if lilang_type.is_array:
+        if node.type.array_depth > 0 or node.type.is_struct:
             self.variables[node.identifier] = LLVMVariable(
                 node.identifier,
-                node.type,
-                result
+                node.type.type,
+                node.type.array_depth,
+                result,
+                is_struct=node.type.is_struct
             )
         else:
             var_addr = self.builder.alloca(
@@ -225,7 +239,8 @@ class LLVMCodeGenerator(CodeGenerator):
             self.builder.store(result, var_addr)
             self.variables[node.identifier] = LLVMVariable(
                 node.identifier,
-                node.type,
+                node.type.type,
+                node.type.array_depth,
                 var_addr
             )
 
@@ -333,13 +348,12 @@ class LLVMCodeGenerator(CodeGenerator):
 
     def _generate_AstLstExpr(self, node):
         result = []
-        lst_type = LilangType.type_from_str(node.type).base_type.llvm_type
 
         for arg in node.args_lst.args_lst:
             result.append(self.generate_code(arg))
 
         var_addr = self.builder.alloca(
-            lst_type, size=len(result)
+            result[0].type, size=len(result)
         )
 
         for idx, num in enumerate(result):
@@ -356,7 +370,7 @@ class LLVMCodeGenerator(CodeGenerator):
             result.append(self.generate_code(arg))
 
         var_addr = self.builder.alloca(
-            LilangType.type_from_str(node.type).llvm_type,
+            LilangType.type_from_str(node.type.type).llvm_type,
             size=None
         )
 
@@ -371,7 +385,7 @@ class LLVMCodeGenerator(CodeGenerator):
             self.builder.store(
                 ir.Constant(
                     LilangType.type_from_str(
-                        node.type
+                        node.type.type
                     ).llvm_type.elements[idx],
                     el.constant
                 ),
@@ -383,18 +397,18 @@ class LLVMCodeGenerator(CodeGenerator):
 
         var = self.variables[node.identifier]
         var_addr = var.address
-        lilang_type = LilangType.type_from_str(var.type)
 
-        if lilang_type.is_array:
+        if var.array_depth > 0:
             index = ir.Constant(IntType.llvm_type, 0)
-            if node.index_expr:
-                index = self.generate_code(node.index_expr)
-
-            var_addr = self.builder.gep(
-                var_addr, [index]
-            )
-            if node.index_expr:
-                return self.builder.load(var_addr)
+            if node.index_exprs:
+                for expr in node.index_exprs:
+                    index = self.generate_code(expr)
+                    var_addr = self.builder.gep(
+                        var_addr, [index]
+                    )
+                    var_addr = self.builder.load(var_addr)
+            return var_addr
+        elif var.is_struct:
             return var_addr
         else:
             return self.builder.load(var_addr)
@@ -406,8 +420,10 @@ class LLVMCodeGenerator(CodeGenerator):
             var_name = node.variable.attribute
         else:
             var_name = node.variable.identifier
+
         var = self.variables[var_name]
         idx = 0
+
         for field in LilangType.type_from_str(var.type).fields:
             if field[0] == node.attribute:
                 break
@@ -432,9 +448,18 @@ class LLVMCodeGenerator(CodeGenerator):
                 var_arg = True
                 fn_args.append(ir.IntType(32))
                 break
-            fn_args.append(LilangType.type_from_str(arg[1]).llvm_type)
+            arg_type = LilangType.type_from_str(arg[1].type).llvm_type
+            if arg[1].array_depth > 0:
+                arg_type = ir.PointerType(arg_type)
+                for i in range(arg[1].array_depth - 1):
+                    arg_type = ir.PointerType(arg_type)
+            fn_args.append(arg_type)
 
-        return_type = LilangType.type_from_str(node.type).llvm_type
+        return_type = LilangType.type_from_str(node.type.type).llvm_type
+        if node.type.array_depth > 0:
+            return_type = ir.PointerType(return_type)
+            for i in range(arg[1].array_depth - 1):
+                return_type = ir.PointerType(return_type)
 
         fn_type = ir.FunctionType(return_type, fn_args, var_arg=var_arg)
         fn = ir.Function(self.main_module, fn_type, name=node.name)
@@ -459,18 +484,20 @@ class LLVMCodeGenerator(CodeGenerator):
                     )
                     self.builder.call(self.va_start, [var_addr_i8])
                     result = self.builder.call(
-                        self.main_module.get_global(f'vaargs{arg[1]}'),
+                        self.main_module.get_global(f'vaargs{arg[1].type}'),
                         [fn.args[index], var_addr_i8]
                     )
                     self.builder.call(self.va_end, [var_addr_i8])
                     self.variables[arg[0]] = LLVMVariable(
                         arg[0],
-                        f'{arg[1]}[]',
+                        f'{arg[1].type}',
+                        1,
                         result
                     )
                     break
-                lilang_type = LilangType.type_from_str(arg[1])
-                if lilang_type.is_array:
+
+                lilang_type = LilangType.type_from_str(arg[1].type)
+                if arg[1].array_depth > 0:
                     address = fn.args[index]
                 else:
                     address = self.builder.alloca(
@@ -479,16 +506,18 @@ class LLVMCodeGenerator(CodeGenerator):
 
                 self.variables[arg[0]] = LLVMVariable(
                     arg[0],
-                    arg[1],
-                    address
+                    arg[1].type,
+                    arg[1].array_depth,
+                    address,
+                    is_struct=node.type.is_struct
                 )
 
-                if not lilang_type.is_array:
+                if arg[1].array_depth == 0:
                     self.builder.store(fn.args[index], address)
 
             if node.stat_lst:
                 self.generate_code(node.stat_lst)
-            if node.type == VoidType.str_code:
+            if node.type.type == VoidType.str_code:
                 self.builder.ret_void()
             self.block = last_block
             self.builder = last_builder
@@ -513,7 +542,9 @@ class LLVMCodeGenerator(CodeGenerator):
 
         fields_types = []
         for field in fields:
-            fields_types.append(LilangType.type_from_str(field[1]).llvm_type)
+            fields_types.append(
+                LilangType.type_from_str(field[1].type).llvm_type
+            )
 
         type(
             f"Struct{node.name}Type",
@@ -521,8 +552,6 @@ class LLVMCodeGenerator(CodeGenerator):
             {
                 "str_code": node.name,
                 "llvm_type": ir.LiteralStructType(fields_types),
-                "base_type": None,
-                "is_array": True,
                 "fields": fields
             }
         )

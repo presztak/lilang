@@ -9,6 +9,6 @@ TODO
 * [X] Functions with a variable number of parameters (int, bool)
 * [X] Structs
 * [ ] Imports
-* [ ] Possibility to use variable defined in outer scope
+* [ ] Scopes
 * [ ] Type casting
-* [ ] Multi dimensional arrays
+* [X] Multi dimensional arrays

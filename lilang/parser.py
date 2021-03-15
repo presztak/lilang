@@ -25,6 +25,7 @@ from .ast import (
     AstStructLiteral,
     AstStructStat,
     AstVariable,
+    AstVarType,
     AstWhileStat
 )
 from .lexer import LilangLexer
@@ -213,8 +214,16 @@ class ModuleParser(Parser):
         return AstStructLiteral(p.args_lst)
 
     @_('ID "[" expr "]"')
-    def expr(self, p):
+    def get_expr(self, p):
         return AstVariable(p.ID, p.expr)
+
+    @_('get_expr "[" expr "]"')
+    def get_expr(self, p):
+        return AstVariable(index_expr=p.expr, var=p.get_expr)
+
+    @_('get_expr')
+    def expr(self, p):
+        return AstVariable(var=p.get_expr)
 
     @_('expr "." ID')
     def expr(self, p):
@@ -237,11 +246,29 @@ class ModuleParser(Parser):
         return AstString(p.STRING)
 
     @_(
-        'BASE_TYPE',
-        'ID'
+        'var_type "[" "]"'
     )
     def var_type(self, p):
+        p[0].array_depth += 1
         return p[0]
+
+    @_(
+        'base_var_type',
+    )
+    def var_type(self, p):
+        return AstVarType(p[0].type, is_struct=p[0].is_struct)
+
+    @_(
+        'BASE_TYPE'
+    )
+    def base_var_type(self, p):
+        return AstVarType(p[0])
+
+    @_(
+        'STRUCT ID'
+    )
+    def base_var_type(self, p):
+        return AstVarType(p[1], is_struct=True)
 
     @_('')
     def empty(self, p):

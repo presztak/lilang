@@ -11,7 +11,7 @@ class StructTestCase(LLVMTestCase):
                 bool c;
             }
 
-            A t = {1,2,true};
+            struct A t = {1,2,true};
             printi(t.a);
         '''
         result = self.run_code(code)

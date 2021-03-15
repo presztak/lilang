@@ -60,10 +60,24 @@ class AstString(AstNode):
 
 class AstVariable(AstNode):
 
-    def __init__(self, identifier, index_expr=None):
+    def __init__(self, identifier=None, index_expr=None, var=None):
         self.type = None
-        self.identifier = identifier
-        self.index_expr = index_expr
+        self.index_exprs = []
+        if identifier:
+            self.identifier = identifier
+        if var:
+            self.identifier = var.identifier
+            self.index_exprs = var.index_exprs
+        if index_expr:
+            self.index_exprs.append(index_expr)
+
+
+class AstVarType(AstNode):
+
+    def __init__(self, type, array_depth=0, is_struct=False):
+        self.type = type
+        self.array_depth = array_depth
+        self.is_struct = is_struct
 
 
 class AstGetAttribute(AstNode):

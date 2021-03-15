@@ -1,6 +1,13 @@
 from .parser import ModuleParser
 
 
+class Variable(object):
+
+    def __init__(self, var_type, is_array=False):
+        self.var_type = var_type
+        self.is_array = is_array
+
+
 class SymTab(object):
 
     def __init__(self):
@@ -65,8 +72,9 @@ class SymTab(object):
     def _walk_AstVariable(self, node, data):
         if not node.type:
             node.type = self.variables[node.identifier]
-        if node.index_expr:
-            self.walk(node.index_expr)
+        if node.index_exprs:
+            for expr in node.index_exprs:
+                self.walk(expr)
 
     def _walk_AstGetAttribute(self, node, data):
         self.walk(node.variable)
@@ -106,7 +114,7 @@ class SymTab(object):
     def _walk_AstLstExpr(self, node, data):
         node.type = data["type"]
         for arg in node.args_lst.args_lst:
-            self.walk(arg)
+            self.walk(arg, data)
 
     def _walk_AstBreakStat(self, node, data):
         pass
