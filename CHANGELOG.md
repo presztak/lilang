@@ -1,6 +1,15 @@
 Changelog
 =========
 
+### 0.3.0 March 16, 2021
+
+- Variadic functions
+- Type casting
+- Multi-dimensional arrays
+- Support for string comparation operation
+- Support for compilation errors
+
+
 ### 0.2.0 December 16, 2020
 
 - Support for 'else' clause

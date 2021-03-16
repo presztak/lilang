@@ -27,7 +27,7 @@ vaarglib = Extension(
 
 setuptools.setup(
     name="lilang",
-    version="0.1.0",
+    version="0.3.0",
     author="Piotr Resztak",
     author_email="piotr.resztak@gmail.com",
     description="Lilang package",

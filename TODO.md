@@ -1,14 +1,8 @@
 TODO
 =========
 
-### Version 0.3.0
+### Version 0.4.0
 
-* [X] Support for compilation errors
-* [X] Support for string comparation operation
 * [ ] String representation as a struct
-* [X] Functions with a variable number of parameters (int, bool)
-* [X] Structs
 * [ ] Imports
 * [ ] Scopes
-* [X] Type casting
-* [X] Multi dimensional arrays

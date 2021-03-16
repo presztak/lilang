@@ -62,16 +62,6 @@ int x = 10;
 printi(x);
 ```
 
-#### Array type
-
-An Array is a collection of multiple values. Lilang supports only arrays of integers. In Lilang, the values going into an array are written as a comma-separated list inside square brackets.
-
-Syntax:
-```
-int[] x = [1, 2, 3, 4];
-printi(x[0]);
-```
-
 #### Bool type
 
 A bool is a data type which can store `true` or `false`.
@@ -89,6 +79,27 @@ Syntax:
 ```
 string s = "Hello";
 prints(s);
+```
+
+
+### Arrays
+
+An Array is a collection of multiple values. Lilang supports arrays of integers and bools. In Lilang, the values going into an array are written as a comma-separated list inside square brackets.
+
+Syntax:
+```
+int[] x = [1, 2, 3, 4];
+printi(x[0]);
+```
+
+#### Multi-dimensional arrays
+
+Multi-dimensional arrays can be defined using multiple squere brackets.
+
+Syntax:
+```
+int[][] x = [[1, 2], [3, 4]];
+printi(x[0][1]);
 ```
 
 
@@ -188,6 +199,29 @@ int f(int a, int b) {
     return a + b;
 }
 printi(f(5, 6));
+```
+
+#### Variadic functions
+
+Lilang supports functions with variable number of arguments.
+
+Syntax:
+```
+int f(int ...b) {
+    return b[0] + b[2];
+}
+printi(f(1, 3, 4));
+```
+
+
+### Type casting
+
+Type casting refers to changing an entity of one datatype into another.
+
+Syntax:
+```
+bool a = bool(10);
+int b = int(a);
 ```
 
 
